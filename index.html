@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Corrida da Selva: Onça vs Preguiça</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a2f6c 0%, #041a3a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Container principal com identidade azul/vermelho */
+        .game-container {
+            background: #1a2a3a;
+            background-image: radial-gradient(circle at 25% 40%, rgba(211, 47, 47, 0.15) 2%, transparent 2.5%);
+            background-size: 28px 28px;
+            border-radius: 64px 64px 48px 48px;
+            padding: 20px 25px 30px 25px;
+            box-shadow: 0 30px 35px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,255,200,0.1);
+            border: 1px solid #d32f2f;
+        }
+
+        .race-panel {
+            background: #0f1a24;
+            border-radius: 48px;
+            padding: 20px;
+            box-shadow: inset 0 0 0 2px #2c4c6e, 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        /* Header com logo e placar */
+        .race-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0a2f6ccc;
+            backdrop-filter: blur(4px);
+            padding: 12px 24px;
+            border-radius: 60px;
+            margin-bottom: 25px;
+            color: #ffffff;
+            font-weight: bold;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-area img {
+            max-height: 50px;
+            width: auto;
+            background: white;
+            border-radius: 12px;
+            padding: 4px;
+        }
+
+        .logo-area span {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffec9e;
+        }
+
+        .distance-info {
+            background: #0a2f6c99;
+            padding: 5px 15px;
+            border-radius: 40px;
+            font-size: 1.2rem;
+        }
+
+        .distance-info span {
+            color: #d32f2f;
+            font-size: 1.6rem;
+            font-weight: 800;
+        }
+
+        .bet-badge {
+            background: #d32f2f;
+            color: white;
+            padding: 6px 18px;
+            border-radius: 3rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            box-shadow: inset 0 -1px 0 rgba(0,0,0,0.2), 0 2px 6px black;
+        }
+
+        /* Pista principal */
+        .track-area {
+            background: #2c3e2e;
+            border-radius: 60px;
+            padding: 20px 15px;
+            margin-bottom: 25px;
+            box-shadow: inset 0 0 0 3px #e9c891, 0 8px 18px black;
+        }
+
+        .track {
+            position: relative;
+            background: #1e2a1a;
+            border-radius: 100px;
+            margin: 20px 0;
+            padding: 8px 12px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.6), 0 2px 0 #b97f48;
+        }
+
+        .track:first-child {
+            margin-top: 0;
+        }
+
+        .lane {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .animal-icon {
+            width: 70px;
+            height: 70px;
+            background: #0f1f0a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            box-shadow: 0 4px 8px black, inset 0 1px 3px #ffefb0;
+            background: #2a3a1c;
+            z-index: 2;
+            transition: all 0.05s linear;
+        }
+
+        .track-bar-bg {
+            flex: 1;
+            background: #2e241a;
+            height: 56px;
+            border-radius: 60px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 6px #00000066;
+            position: relative;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background-size: 30px 30px;
+            background-image: repeating-linear-gradient(90deg, 
+                rgba(211, 47, 47, 0.4) 0px, 
+                rgba(211, 47, 47, 0.4) 15px,
+                rgba(10, 47, 108, 0.6) 15px,
+                rgba(10, 47, 108, 0.6) 30px);
+            transition: width 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 0 black;
+        }
+
+        .track-bar-bg::after {
+            content: "🏁";
+            position: absolute;
+            right: 8px;
+            top: 12px;
+            font-size: 2rem;
+            opacity: 0.8;
+            filter: drop-shadow(0 2px 2px black);
+            pointer-events: none;
+        }
+
+        .animal-name {
+            min-width: 100px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: #0f1f0a;
+            padding: 5px 12px;
+            border-radius: 2rem;
+            text-align: center;
+            color: #d32f2f;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 12px 0 5px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #ffffff;
+            background: #0a2f6c99;
+            border-radius: 28px;
+            padding: 5px 15px;
+        }
+
+        .bet-actions {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 25px 0 20px;
+            flex-wrap: wrap;
+        }
+
+        .bet-btn {
+            background: linear-gradient(135deg, #0a2f6c, #052050);
+            border: none;
+            font-size: 1.4rem;
+            font-weight: bold;
+            padding: 12px 28px;
+            border-radius: 60px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #03102a;
+            transition: 0.07s linear;
+            font-family: inherit;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bet-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #03102a;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #2c3e50, #1a2a3a);
+            box-shadow: 0 6px 0 #0f1a24;
+            color: #f2e8c9;
+        }
+
+        .message-area {
+            background: #0a2f6ccc;
+            backdrop-filter: blur(8px);
+            border-radius: 40px;
+            padding: 12px 18px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #ffec9e;
+            margin-top: 15px;
+            border-left: 6px solid #d32f2f;
+        }
+
+        @media (max-width: 650px) {
+            .game-container {
+                padding: 12px;
+            }
+            .animal-icon {
+                width: 55px;
+                height: 55px;
+                font-size: 2.6rem;
+            }
+            .animal-name {
+                font-size: 0.9rem;
+                min-width: 85px;
+            }
+            .bet-btn {
+                padding: 8px 18px;
+                font-size: 1.1rem;
+            }
+            .logo-area img {
+                max-height: 40px;
+            }
+            .race-header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .logo-area {
+                justify-content: center;
+            }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 15px;
+            color: #b4c8e0;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="game-container">
+    <div class="race-panel">
+        <div class="race-header">
+            <div class="logo-area">
+                <img src="https://i.ibb.co/0p01LzxB/logo3de.jpg" alt="Logo SEDUC">
+                <span>Corrida da Selva</span>
+            </div>
+            <div class="bet-badge">🏆 APOSTE E GANHE 🎲</div>
+            <div class="distance-info">🏁 META: <span>120.00 km</span></div>
+        </div>
+
+        <div class="track-area">
+            <!-- Pista Onça -->
+            <div class="track">
+                <div class="lane">
+                    <div class="animal-icon">🐆</div>
+                    <div class="animal-name">ONÇA VELOZ</div>
+                    <div class="track-bar-bg">
+                        <div class="progress-fill" id="oncaFill" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="stats">
+                    <span>⚡ Estratégia: corre METADE do que falta</span>
+                    <span id="oncaKm">0.00 km</span>
+                </div>
+            </div>
+
+            <!-- Pista Preguiça -->
+            <div class="track">
+                <div class="lane">
+                    <div class="animal-icon">🦥</div>
+                    <div class="animal-name">PREGUIÇA LENTA</div>
+                    <div class="track-bar-bg">
+                        <div class="progress-fill" id="preguicaFill" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="stats">
+                    <span>🐢 Passo firme: anda exatos 10.00 km</span>
+                    <span id="preguicaKm">0.00 km</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bet-actions">
+            <button class="bet-btn" id="betOncaBtn">🐆 APOSTAR NA ONÇA</button>
+            <button class="bet-btn" id="betPreguicaBtn">🦥 APOSTAR NA PREGUIÇA</button>
+            <button class="bet-btn reset-btn" id="resetBtn">🔄 NOVA CORRIDA</button>
+        </div>
+
+        <div class="message-area" id="messageBox">
+            💰 Clique num bicho para apostar! Quem chegar primeiro a 120.00 km vence.
+        </div>
+        <footer>⚡ Regras: Onça corre metade da distância restante • Preguiça anda 10.00 km fixos por movimento</footer>
+    </div>
+</div>
+
+<script>
+    // ---------- LÓGICA DA CORRIDA ----------
+    const META_KM = 120.00;
+
+    // Estado dos corredores
+    let oncaDistancia = 0.00;
+    let preguicaDistancia = 0.00;
+    let raceActive = true;
+    let winner = null;
+    
+    // elementos DOM
+    const oncaFill = document.getElementById('oncaFill');
+    const preguicaFill = document.getElementById('preguicaFill');
+    const oncaKmSpan = document.getElementById('oncaKm');
+    const preguicaKmSpan = document.getElementById('preguicaKm');
+    const messageBox = document.getElementById('messageBox');
+    
+    // Botões
+    const betOncaBtn = document.getElementById('betOncaBtn');
+    const betPreguicaBtn = document.getElementById('betPreguicaBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    
+    // Função para formatar com 2 casas decimais
+    function formatKm(value) {
+        return value.toFixed(2);
+    }
+    
+    function updateUI() {
+        let oncaPercent = (oncaDistancia / META_KM) * 100;
+        let preguicaPercent = (preguicaDistancia / META_KM) * 100;
+        oncaPercent = Math.min(100, oncaPercent);
+        preguicaPercent = Math.min(100, preguicaPercent);
+        
+        oncaFill.style.width = `${oncaPercent}%`;
+        preguicaFill.style.width = `${preguicaPercent}%`;
+        
+        oncaKmSpan.innerText = `${formatKm(oncaDistancia)} km`;
+        preguicaKmSpan.innerText = `${formatKm(preguicaDistancia)} km`;
+        
+        if (oncaDistancia >= META_KM) {
+            oncaFill.style.background = "linear-gradient(90deg, #d32f2f, #ff6b6b)";
+            oncaFill.style.boxShadow = "0 0 8px #d32f2f";
+        } else {
+            oncaFill.style.background = "";
+            oncaFill.style.backgroundImage = "repeating-linear-gradient(90deg, rgba(211,47,47,0.4) 0px, rgba(211,47,47,0.4) 15px, rgba(10,47,108,0.6) 15px, rgba(10,47,108,0.6) 30px)";
+            oncaFill.style.boxShadow = "";
+        }
+        
+        if (preguicaDistancia >= META_KM) {
+            preguicaFill.style.background = "linear-gradient(90deg, #d32f2f, #ff6b6b)";
+            preguicaFill.style.boxShadow = "0 0 8px #d32f2f";
+        } else {
+            preguicaFill.style.background = "";
+            preguicaFill.style.backgroundImage = "repeating-linear-gradient(90deg, rgba(211,47,47,0.4) 0px, rgba(211,47,47,0.4) 15px, rgba(10,47,108,0.6) 15px, rgba(10,47,108,0.6) 30px)";
+            preguicaFill.style.boxShadow = "";
+        }
+    }
+    
+    function checkWinner() {
+        if (!raceActive) return true;
+        
+        let winnerDetected = null;
+        if (oncaDistancia >= META_KM) {
+            winnerDetected = 'onca';
+        } else if (preguicaDistancia >= META_KM) {
+            winnerDetected = 'preguica';
+        }
+        
+        if (winnerDetected) {
+            raceActive = false;
+            winner = winnerDetected;
+            if (winnerDetected === 'onca') {
+                messageBox.innerHTML = "🏆🐆 VITÓRIA DA ONÇA! A fera selvagem cruzou a linha primeiro! Parabéns aos apostadores na onça! 🎉💰";
+            } else {
+                messageBox.innerHTML = "🏆🦥 MILAGRE NA SELVA! A PREGUIÇA VENCEU! Quem apostou na preguiça faturou o prêmio máximo! 🌟🎉";
+            }
+            messageBox.style.background = "#0a2f6cdd";
+            messageBox.style.borderLeft = "8px solid #d32f2f";
+            betOncaBtn.disabled = true;
+            betPreguicaBtn.disabled = true;
+            betOncaBtn.style.opacity = "0.6";
+            betPreguicaBtn.style.opacity = "0.6";
+            betOncaBtn.style.cursor = "not-allowed";
+            betPreguicaBtn.style.cursor = "not-allowed";
+            return true;
+        }
+        return false;
+    }
+    
+    function moveOnca() {
+        if (!raceActive || oncaDistancia >= META_KM) return false;
+        let falta = META_KM - oncaDistancia;
+        let avance = falta / 2;
+        let novaDistancia = oncaDistancia + avance;
+        if (novaDistancia > META_KM) novaDistancia = META_KM;
+        oncaDistancia = parseFloat(novaDistancia.toFixed(5));
+        updateUI();
+        return true;
+    }
+    
+    function movePreguica() {
+        if (!raceActive || preguicaDistancia >= META_KM) return false;
+        let novaDistancia = preguicaDistancia + 10.00;
+        if (novaDistancia > META_KM) novaDistancia = META_KM;
+        preguicaDistancia = parseFloat(novaDistancia.toFixed(5));
+        updateUI();
+        return true;
+    }
+    
+    function executarRodada() {
+        if (!raceActive) return;
+        let oncaAntes = oncaDistancia;
+        let preguicaAntes = preguicaDistancia;
+        
+        moveOnca();
+        movePreguica();
+        
+        if (raceActive) {
+            let oncaDelta = (oncaDistancia - oncaAntes).toFixed(2);
+            let preguicaDelta = (preguicaDistancia - preguicaAntes).toFixed(2);
+            messageBox.innerHTML = `🏁 RODADA: Onça avançou ${oncaDelta} km | Preguiça avançou ${preguicaDelta} km. Corrida em andamento!`;
+            messageBox.style.background = "#0a2f6ccc";
+            messageBox.style.borderLeft = "6px solid #d32f2f";
+        }
+        checkWinner();
+        updateUI();
+    }
+    
+    function realizarAposta(animal) {
+        if (!raceActive) {
+            messageBox.innerHTML = "🏁 A corrida já terminou! Clique em NOVA CORRIDA para apostar novamente.";
+            return;
+        }
+        let nomeAnimal = (animal === 'onca') ? 'ONÇA 🐆' : 'PREGUIÇA 🦥';
+        messageBox.innerHTML = `🎲 APOSTA REGISTRADA! Você torce pela ${nomeAnimal}. Preparando a rodada...`;
+        messageBox.style.background = "#0a2f6ccc";
+        messageBox.style.borderLeft = "6px solid #d32f2f";
+        
+        executarRodada();
+        
+        if (!raceActive) {
+            if (winner === animal) {
+                messageBox.innerHTML = `🎉✨ VOCÊ GANHOU A APOSTA! ✨🎉 Sua fé em ${nomeAnimal} valeu a pena! O bicho venceu a corrida! Prêmio dobrado! 💰💰`;
+            } else {
+                let perdedorNome = (winner === 'onca') ? 'ONÇA' : 'PREGUIÇA';
+                messageBox.innerHTML = `😢 QUE PENA! Sua aposta em ${nomeAnimal} não deu certo. Quem venceu foi ${perdedorNome}. Tente novamente! 🎲`;
+            }
+            messageBox.style.background = "#0a2f6cdd";
+            messageBox.style.borderLeft = "8px solid #d32f2f";
+        } else {
+            messageBox.innerHTML = `🐆 ${formatKm(oncaDistancia)} km  x  ${formatKm(preguicaDistancia)} km 🦥 | Aposta ativa em ${nomeAnimal}. A corrida segue!`;
+        }
+        updateUI();
+    }
+    
+    function resetRace() {
+        raceActive = true;
+        winner = null;
+        oncaDistancia = 0.00;
+        preguicaDistancia = 0.00;
+        
+        betOncaBtn.disabled = false;
+        betPreguicaBtn.disabled = false;
+        betOncaBtn.style.opacity = "1";
+        betPreguicaBtn.style.opacity = "1";
+        betOncaBtn.style.cursor = "pointer";
+        betPreguicaBtn.style.cursor = "pointer";
+        
+        updateUI();
+        messageBox.innerHTML = "🔄 NOVA CORRIDA! Escolha seu animal e clique para apostar. Onça corre metade do que falta, Preguiça anda 10.00 km fixos. Quem chegar a 120.00 km vence!";
+        messageBox.style.background = "#0a2f6ccc";
+        messageBox.style.borderLeft = "6px solid #d32f2f";
+        
+        oncaFill.style.background = "";
+        preguicaFill.style.background = "";
+        oncaFill.style.backgroundImage = "repeating-linear-gradient(90deg, rgba(211,47,47,0.4) 0px, rgba(211,47,47,0.4) 15px, rgba(10,47,108,0.6) 15px, rgba(10,47,108,0.6) 30px)";
+        preguicaFill.style.backgroundImage = "repeating-linear-gradient(90deg, rgba(211,47,47,0.4) 0px, rgba(211,47,47,0.4) 15px, rgba(10,47,108,0.6) 15px, rgba(10,47,108,0.6) 30px)";
+    }
+    
+    betOncaBtn.addEventListener('click', () => realizarAposta('onca'));
+    betPreguicaBtn.addEventListener('click', () => realizarAposta('preguica'));
+    resetBtn.addEventListener('click', resetRace);
+    
+    resetRace();
+</script>
+</body>
+</html>
